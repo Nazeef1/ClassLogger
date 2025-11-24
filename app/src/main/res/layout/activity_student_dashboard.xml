@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_gray">
+
+    <!-- Header Section -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardElevation="4dp"
+        app:cardCornerRadius="0dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:background="@color/teal_700">
+
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Welcome, Student"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnLogout"/>
+
+            <TextView
+                android:id="@+id/tvRollNumber"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Roll No: 12345"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toBottomOf="@id/tvWelcome"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnLogout"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tvEmail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="student@example.com"
+                android:textSize="14sp"
+                android:textColor="@android:color/white"
+                app:layout_constraintTop_toBottomOf="@id/tvRollNumber"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnLogout"
+                android:layout_marginTop="2dp"/>
+
+            <ImageButton
+                android:id="@+id/btnLogout"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_logout"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/logout"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="@android:color/white"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Dashboard Options -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/cardHeader"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Mark Attendance Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMarkAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginBottom="16dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_purple">
+
+                    <ImageView
+                        android:id="@+id/ivMarkAttendance"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_camera"
+                        android:contentDescription="@string/mark_attendance"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:tint="@android:color/white"/>
+
+                    <TextView
+                        android:id="@+id/tvMarkAttendance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Mark Attendance"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Take selfie for active classes"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        app:layout_constraintBottom_toTopOf="@id/tvMarkAttendance"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginBottom="4dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- View Attendance Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardViewAttendance"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:layout_marginBottom="16dp"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:padding="20dp"
+                    android:background="@drawable/gradient_teal">
+
+                    <ImageView
+                        android:id="@+id/ivViewAttendance"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:src="@drawable/ic_history"
+                        android:contentDescription="@string/view_attendance"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:tint="@android:color/white"/>
+
+                    <TextView
+                        android:id="@+id/tvViewAttendance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="View Attendance"
+                        android:textSize="22sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Check your attendance history"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/white"
+                        app:layout_constraintBottom_toTopOf="@id/tvViewAttendance"
+                        app:layout_constraintStart_toStartOf="parent"
+                        android:layout_marginBottom="4dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Class Logger</string>
+    <string name="app_logo">App Logo</string>
+    <string name="logout">Logout</string>
+    <string name="take_attendance">Take Attendance</string>
+    <string name="view_attendance">View Attendance</string>
+    <string name="mark_attendance">Mark Attendance</string>
+    <string name="active_sessions">Active Sessions</string>
+</resources>

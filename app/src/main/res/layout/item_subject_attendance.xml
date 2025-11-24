@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardElevation="4dp"
+    app:cardCornerRadius="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/tvSubjectName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Subject Name"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/tvPercentage"/>
+
+        <TextView
+            android:id="@+id/tvSubjectCode"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="CODE123"
+            android:textSize="14sp"
+            android:textColor="@color/gray"
+            app:layout_constraintTop_toBottomOf="@id/tvSubjectName"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="4dp"/>
+
+        <TextView
+            android:id="@+id/tvPercentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="75.0%"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/layoutClasses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintTop_toBottomOf="@id/tvSubjectCode"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attended: "
+                android:textSize="14sp"
+                android:textColor="@color/gray"/>
+
+            <TextView
+                android:id="@+id/tvAttendedClasses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:id="@+id/tvTotalClasses"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/ 20"
+                android:textSize="14sp"
+                android:textColor="@color/gray"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=" classes"
+                android:textSize="14sp"
+                android:textColor="@color/gray"/>
+        </LinearLayout>
+
+        <!-- Progress Bar Container -->
+        <View
+            android:id="@+id/progressBarBackground"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/light_gray"
+            app:layout_constraintTop_toBottomOf="@id/layoutClasses"
+            android:layout_marginTop="12dp"/>
+
+        <View
+            android:id="@+id/progressBar"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:background="@color/green"
+            app:layout_constraintTop_toTopOf="@id/progressBarBackground"
+            app:layout_constraintStart_toStartOf="@id/progressBarBackground"
+            app:layout_constraintBottom_toBottomOf="@id/progressBarBackground"/>
+
+        <ImageView
+            android:id="@+id/ivArrow"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_right"
+            app:layout_constraintTop_toTopOf="@id/layoutClasses"
+            app:layout_constraintBottom_toBottomOf="@id/progressBarBackground"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:tint="@color/gray"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

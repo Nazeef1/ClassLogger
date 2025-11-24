@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvLoadingSession"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Session Details"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/cameraPreview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tvLoadingSession"
+        app:layout_constraintBottom_toTopOf="@id/btnCaptureSelfie"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintDimensionRatio="3:4"/>
+
+    <ImageView
+        android:id="@+id/imgCapturedSelfie"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="@id/cameraPreview"
+        app:layout_constraintBottom_toBottomOf="@id/cameraPreview"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btnCaptureSelfie"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Capture Selfie"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toTopOf="@id/progressBar"/>
+
+    <Button
+        android:id="@+id/btnRetake"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Retake"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnSubmit"
+        app:layout_constraintTop_toTopOf="@id/btnCaptureSelfie"/>
+
+    <Button
+        android:id="@+id/btnSubmit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Submit"
+        android:visibility="gone"
+        android:layout_marginStart="8dp"
+        app:layout_constraintStart_toEndOf="@id/btnRetake"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnCaptureSelfie"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/btnCaptureSelfie"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvStatus"/>
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBar"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
