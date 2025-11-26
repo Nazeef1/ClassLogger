@@ -2,10 +2,10 @@ package com.example.classlogger.ui.student
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.*
 import android.os.Bundle
 import android.util.Base64
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -38,6 +38,8 @@ class StudentAttendanceActivity : AppCompatActivity() {
     private var capturedBitmap: Bitmap? = null
 
     private val CAMERA_PERMISSION_CODE = 100
+    private val TAG = "StudentAttendanceActivity"
+    private val CONFIDENCE_THRESHOLD = 0.7f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,11 +61,8 @@ class StudentAttendanceActivity : AppCompatActivity() {
 
     private fun setupUI() {
         binding.btnCaptureSelfie.setOnClickListener {
-            if (checkCameraPermission()) {
-                captureSelfie()
-            } else {
-                requestCameraPermission()
-            }
+            if (checkCameraPermission()) captureSelfie()
+            else requestCameraPermission()
         }
 
         binding.btnRetake.setOnClickListener {
@@ -77,22 +76,22 @@ class StudentAttendanceActivity : AppCompatActivity() {
             startCamera()
         }
 
-        binding.btnSubmit.setOnClickListener {
-            submitAttendance()
-        }
+        binding.btnSubmit.setOnClickListener { submitAttendance() }
     }
 
     private fun loadSessionDetails() {
         lifecycleScope.launch {
             binding.tvLoadingSession.text = "Loading session details..."
 
-            // Get session and verify WiFi
             val sessionResult = repository.getSession(sessionId)
 
             if (sessionResult.isSuccess) {
                 val session = sessionResult.getOrNull()
                 if (session != null) {
-                    val wifiVerified = wifiUtils.verifyClassroomWiFi(session.wifiSSID, session.wifiBSSID)
+
+                    val wifiVerified =
+                        wifiUtils.verifyClassroomWiFi(session.wifiSSID, session.wifiBSSID)
+
                     if (!wifiVerified) {
                         showWiFiError()
                         return@launch
@@ -100,20 +99,22 @@ class StudentAttendanceActivity : AppCompatActivity() {
 
                     binding.tvLoadingSession.text = "Session: ${session.subjectId}"
 
-                    if (checkCameraPermission()) {
-                        startCamera()
-                    } else {
-                        requestCameraPermission()
-                    }
+                    if (checkCameraPermission()) startCamera()
+                    else requestCameraPermission()
+
                 } else {
-                    Toast.makeText(this@StudentAttendanceActivity,
-                        "Session not found", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@StudentAttendanceActivity,
+                        "Session not found", Toast.LENGTH_SHORT
+                    ).show()
                     finish()
                 }
             } else {
-                Toast.makeText(this@StudentAttendanceActivity,
+                Toast.makeText(
+                    this@StudentAttendanceActivity,
                     "Error loading session: ${sessionResult.exceptionOrNull()?.message}",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
@@ -123,24 +124,20 @@ class StudentAttendanceActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle("WiFi Error")
             .setMessage("You must be connected to the classroom WiFi to mark attendance.")
-            .setPositiveButton("OK") { _, _ ->
-                finish()
-            }
+            .setPositiveButton("OK") { _, _ -> finish() }
             .setCancelable(false)
             .show()
     }
 
     private fun checkCameraPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
-            this, Manifest.permission.CAMERA
+            this,
+            Manifest.permission.CAMERA
         ) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestCameraPermission() {
-        requestPermissions(
-            arrayOf(Manifest.permission.CAMERA),
-            CAMERA_PERMISSION_CODE
-        )
+        requestPermissions(arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE)
     }
 
     override fun onRequestPermissionsResult(
@@ -149,10 +146,11 @@ class StudentAttendanceActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode == CAMERA_PERMISSION_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 startCamera()
-            } else {
+            else {
                 Toast.makeText(this, "Camera permission required", Toast.LENGTH_SHORT).show()
                 finish()
             }
@@ -167,11 +165,10 @@ class StudentAttendanceActivity : AppCompatActivity() {
 
             val preview = Preview.Builder()
                 .build()
-                .also {
-                    it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
-                }
+                .also { it.setSurfaceProvider(binding.cameraPreview.surfaceProvider) }
 
             imageCapture = ImageCapture.Builder()
+                .setTargetRotation(windowManager.defaultDisplay.rotation)
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build()
 
@@ -180,12 +177,19 @@ class StudentAttendanceActivity : AppCompatActivity() {
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
+                    this,
+                    cameraSelector,
+                    preview,
+                    imageCapture
                 )
             } catch (e: Exception) {
-                Toast.makeText(this, "Camera start failed: ${e.message}",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "Camera start failed: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
+
         }, ContextCompat.getMainExecutor(this))
     }
 
@@ -198,7 +202,15 @@ class StudentAttendanceActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback() {
                 override fun onCaptureSuccess(image: ImageProxy) {
-                    capturedBitmap = imageProxyToBitmap(image)
+
+                    var bmp = imageProxyToBitmap(image)
+
+                    // ------------------------------
+                    // 🔧 ROTATION FIX APPLIED HERE
+                    // ------------------------------
+                    bmp = rotateBitmapIfNeeded(bmp, image)
+
+                    capturedBitmap = bmp
                     image.close()
 
                     binding.cameraPreview.visibility = View.GONE
@@ -212,43 +224,101 @@ class StudentAttendanceActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exception: ImageCaptureException) {
-                    Toast.makeText(this@StudentAttendanceActivity,
-                        "Capture failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@StudentAttendanceActivity,
+                        "Capture failed: ${exception.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     binding.btnCaptureSelfie.isEnabled = true
                 }
             }
         )
     }
 
+    // ---------------------------------------------------------
+    // ✔ ADDED FUNCTION: Rotate the bitmap using ImageProxy info
+    // ---------------------------------------------------------
+    private fun rotateBitmapIfNeeded(bitmap: Bitmap, image: ImageProxy): Bitmap {
+        val rotationDegrees = image.imageInfo.rotationDegrees
+        if (rotationDegrees == 0) return bitmap
+
+        val matrix = Matrix()
+        matrix.postRotate(rotationDegrees.toFloat())
+
+        return Bitmap.createBitmap(
+            bitmap,
+            0, 0,
+            bitmap.width,
+            bitmap.height,
+            matrix,
+            true
+        )
+    }
+
     private fun imageProxyToBitmap(image: ImageProxy): Bitmap {
-        val buffer = image.planes[0].buffer
-        val bytes = ByteArray(buffer.remaining())
-        buffer.get(bytes)
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        return when (image.format) {
+
+            ImageFormat.JPEG -> {
+                val buffer = image.planes[0].buffer
+                val bytes = ByteArray(buffer.remaining())
+                buffer.get(bytes)
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            }
+
+            ImageFormat.YUV_420_888 -> {
+                val yBuffer = image.planes[0].buffer
+                val uBuffer = image.planes[1].buffer
+                val vBuffer = image.planes[2].buffer
+
+                val ySize = yBuffer.remaining()
+                val uSize = uBuffer.remaining()
+                val vSize = vBuffer.remaining()
+
+                val nv21 = ByteArray(ySize + uSize + vSize)
+
+                yBuffer.get(nv21, 0, ySize)
+                vBuffer.get(nv21, ySize, vSize)
+                uBuffer.get(nv21, ySize + vSize, uSize)
+
+                val yuvImage = YuvImage(nv21, ImageFormat.NV21, image.width, image.height, null)
+                val out = ByteArrayOutputStream()
+                yuvImage.compressToJpeg(Rect(0, 0, image.width, image.height), 95, out)
+
+                BitmapFactory.decodeByteArray(out.toByteArray(), 0, out.size())
+            }
+
+            else -> {
+                Log.e(TAG, "Unsupported ImageProxy format: ${image.format}")
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            }
+        }
+    }
+
+    private fun bitmapToJpegBytes(bitmap: Bitmap): ByteArray {
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)
+        return stream.toByteArray()
     }
 
     private fun bitmapToBase64(bitmap: Bitmap): String {
-        val outputStream = ByteArrayOutputStream()
-        // Compress to reduce size - 512x512 max, 80% quality
-        val scaledBitmap = scaleBitmap(bitmap, 512, 512)
-        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-        val byteArray = outputStream.toByteArray()
-        return Base64.encodeToString(byteArray, Base64.DEFAULT)
+        val stream = ByteArrayOutputStream()
+        val scaled = scaleBitmap(bitmap, 720, 720)
+        scaled.compress(Bitmap.CompressFormat.JPEG, 90, stream)
+        return Base64.encodeToString(stream.toByteArray(), Base64.DEFAULT)
     }
 
     private fun scaleBitmap(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
+        if (width <= maxWidth && height <= maxHeight) return bitmap
 
-        if (width <= maxWidth && height <= maxHeight) {
-            return bitmap
-        }
-
-        val scale = Math.min(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
-        val newWidth = (width * scale).toInt()
-        val newHeight = (height * scale).toInt()
-
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+        val scale = minOf(maxWidth.toFloat() / width, maxHeight.toFloat() / height)
+        return Bitmap.createScaledBitmap(
+            bitmap,
+            (width * scale).toInt(),
+            (height * scale).toInt(),
+            true
+        )
     }
 
     private fun submitAttendance() {
@@ -265,60 +335,50 @@ class StudentAttendanceActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Convert bitmap to base64
                 binding.tvStatus.text = "Processing image..."
-                val base64Image = bitmapToBase64(bitmap)
+                val imageBytes = bitmapToJpegBytes(bitmap)
 
-                // Verify face with FaceNet server
-                binding.tvStatus.text = "Verifying face..."
-                val verificationResult = faceRepository.verifyFace(studentId, base64Image)
+                binding.tvStatus.text = "Verifying face... (may take a moment)"
+                val predictResult = faceRepository.predictFace(imageBytes)
 
-                // Check if the Result is successful
-                if (verificationResult.isSuccess) {
-                    // Safely get the response (nullable)
-                    val response = verificationResult.getOrNull()
+                if (predictResult.isSuccess) {
+                    val response = predictResult.getOrNull()
 
-                    // Check if response exists
                     if (response != null) {
-                        // Extract properties safely
-                        val isMatchResult = response.isMatch
-                        val confidenceScore = response.confidence
 
-                        // Check if face matches with good confidence
-                        if (isMatchResult && confidenceScore > 0.7f) {
-                            // Face verified successfully, mark attendance
+                        if (response.label == studentId && response.confidence >= CONFIDENCE_THRESHOLD) {
+
                             binding.tvStatus.text = "Saving attendance..."
+                            val base64Image = bitmapToBase64(bitmap)
 
-                            val markResult = repository.markAttendance(
-                                sessionId = sessionId,
-                                studentId = studentId,
-                                selfieBase64 = base64Image,
-                                verificationScore = confidenceScore
+                            val mark = repository.markAttendance(
+                                sessionId,
+                                studentId,
+                                base64Image,
+                                response.confidence
                             )
 
-                            if (markResult.isSuccess) {
+                            if (mark.isSuccess) {
                                 binding.progressBar.visibility = View.GONE
                                 showSuccessDialog()
                             } else {
-                                val errorMessage = markResult.exceptionOrNull()?.message ?: "Unknown error"
-                                showError("Failed to mark attendance: $errorMessage")
+                                showError("Failed to mark attendance.")
                             }
+
                         } else {
-                            // Face doesn't match or confidence too low
-                            val confidencePercent = String.format("%.2f", confidenceScore * 100)
-                            showError("Face verification failed. Confidence: $confidencePercent%. Please try again.")
+                            val reason = when (response.label) {
+                                "no_face" -> "No face detected. Please ensure good lighting."
+                                "unknown" -> "Face not recognized."
+                                else -> "Face mismatch. Detected: ${response.label}"
+                            }
+
+                            showError("Face verification failed.\n$reason")
                         }
-                    } else {
-                        // Response is null - shouldn't happen but handle it
-                        showError("Invalid response from verification server. Please try again.")
-                    }
-                } else {
-                    // Verification request failed
-                    val errorMessage = verificationResult.exceptionOrNull()?.message ?: "Unknown error"
-                    showError("Verification error: $errorMessage")
-                }
+                    } else showError("Invalid response from server.")
+
+                } else showError("Verification error: ${predictResult.exceptionOrNull()?.message}")
+
             } catch (e: Exception) {
-                // Catch any unexpected errors
                 showError("Error: ${e.message}")
             }
         }
@@ -328,9 +388,7 @@ class StudentAttendanceActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Success!")
             .setMessage("Your attendance has been marked successfully.")
-            .setPositiveButton("OK") { _, _ ->
-                finish()
-            }
+            .setPositiveButton("OK") { _, _ -> finish() }
             .setCancelable(false)
             .show()
     }

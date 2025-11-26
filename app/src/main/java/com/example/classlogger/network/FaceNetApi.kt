@@ -4,13 +4,17 @@ import com.example.classlogger.models.FaceVerificationResponse
 import com.example.classlogger.models.FaceEncodingRequest
 import com.example.classlogger.models.FaceEncodingResponse
 import com.example.classlogger.models.FaceVerificationRequest
+import com.example.classlogger.models.PredictResponse
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import java.util.concurrent.TimeUnit
 
 // Retrofit API Interface
@@ -25,20 +29,29 @@ interface FaceNetApi {
     suspend fun encodeFace(
         @Body request: FaceEncodingRequest
     ): Response<FaceEncodingResponse>
+
+    @Multipart
+    @POST("/predict")
+    suspend fun predictFace(
+        @Part file: MultipartBody.Part
+    ): Response<PredictResponse>
 }
 
 // Retrofit Client Builder
 object FaceNetApiClient {
 
-    private const val TIMEOUT_SECONDS = 30L
+    // Increased timeout for full resolution image processing
+    private const val TIMEOUT_SECONDS = 60L
 
-    // Update this with your ngrok URL
-    // Example: "https://your-ngrok-id.ngrok.io/"
-    private var BASE_URL = "https://spatially-bridgelike-lona.ngrok-free.dev"
+    // Update this with your Cloudflare tunnel URL
+    // Example: "https://your-tunnel-name.trycloudflare.com/"
+    private var BASE_URL = "https://packaging-exotic-microphone-changes.trycloudflare.com"
 
     fun setBaseUrl(url: String) {
         BASE_URL = if (url.endsWith("/")) url else "$url/"
     }
+
+    fun getBaseUrl(): String = BASE_URL
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
