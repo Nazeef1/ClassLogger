@@ -15,3 +15,4 @@
 local.properties
 venv/
 classlogger-server/*Key.json 
+app/google-services.json

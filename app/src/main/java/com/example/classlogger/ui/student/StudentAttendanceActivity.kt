@@ -19,6 +19,7 @@ import com.example.classlogger.repository.FirebaseRepository
 import com.example.classlogger.utils.WiFiUtils
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -32,6 +33,11 @@ class StudentAttendanceActivity : AppCompatActivity() {
 
     private var studentId: String = ""
     private var sessionId: String = ""
+
+    // Store session details for attendance marking
+    private var classroomId: String = ""
+    private var subjectId: String = ""
+    private var subjectName: String = ""
 
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
@@ -89,6 +95,24 @@ class StudentAttendanceActivity : AppCompatActivity() {
                 val session = sessionResult.getOrNull()
                 if (session != null) {
 
+                    // Store session details for later use
+                    classroomId = session.classroomId
+                    subjectId = session.subjectId
+
+                    // Fetch subject name from subjects collection
+                    try {
+                        val subjectDoc = repository.firestore
+                            .collection("subjects")
+                            .document(session.subjectId)
+                            .get()
+                            .await()
+
+                        subjectName = subjectDoc.getString("name") ?: "Unknown Subject"
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error fetching subject name: ${e.message}")
+                        subjectName = "Unknown Subject"
+                    }
+
                     val wifiVerified =
                         wifiUtils.verifyClassroomWiFi(session.wifiSSID, session.wifiBSSID)
 
@@ -97,7 +121,7 @@ class StudentAttendanceActivity : AppCompatActivity() {
                         return@launch
                     }
 
-                    binding.tvLoadingSession.text = "Session: ${session.subjectId}"
+                    binding.tvLoadingSession.text = "Session: $subjectName"
 
                     if (checkCameraPermission()) startCamera()
                     else requestCameraPermission()
@@ -351,9 +375,13 @@ class StudentAttendanceActivity : AppCompatActivity() {
                             binding.tvStatus.text = "Saving attendance..."
                             val base64Image = bitmapToBase64(bitmap)
 
-                            val mark = repository.markAttendance(
+                            // Mark attendance with subject information
+                            val mark = markAttendanceWithSubject(
                                 sessionId,
                                 studentId,
+                                classroomId,
+                                subjectId,
+                                subjectName,
                                 base64Image,
                                 response.confidence
                             )
@@ -384,6 +412,42 @@ class StudentAttendanceActivity : AppCompatActivity() {
         }
     }
 
+    private suspend fun markAttendanceWithSubject(
+        sessionId: String,
+        studentId: String,
+        classroomId: String,
+        subjectId: String,
+        subjectName: String,
+        selfieBase64: String,
+        verificationScore: Float
+    ): Result<Unit> {
+        return try {
+            val attendanceData = hashMapOf(
+                "sessionId" to sessionId,
+                "studentId" to studentId,
+                "classroomId" to classroomId,
+                "subjectId" to subjectId,
+                "subjectName" to subjectName,
+                "status" to "PRESENT",
+                "markedAt" to System.currentTimeMillis(),
+                "markedBy" to "STUDENT",
+                "selfieUrl" to selfieBase64,
+                "verificationScore" to (verificationScore * 100).toInt(),
+                "overriddenBy" to ""
+            )
+
+            repository.firestore
+                .collection("attendance")
+                .add(attendanceData)
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error marking attendance: ${e.message}")
+            Result.failure(e)
+        }
+    }
+
     private fun showSuccessDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Success!")
@@ -401,7 +465,6 @@ class StudentAttendanceActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Error")
             .setMessage(message)
-            .setPositiveButton("OK", null)
             .show()
     }
 

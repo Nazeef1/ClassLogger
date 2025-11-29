@@ -84,7 +84,7 @@ dependencies {
 
     // WiFi detection
     // Built into Android SDK
-
+    implementation("androidx.cardview:cardview:1.0.0")
 
     // Charts for attendance visualization (optional)
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")

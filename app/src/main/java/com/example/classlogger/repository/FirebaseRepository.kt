@@ -231,6 +231,13 @@ class FirebaseRepository {
         teacherId: String
     ): Result<Unit> {
         return try {
+            // Get session details for subject info
+            val session = sessionsCollection.document(sessionId).get().await()
+                .toObject(Session::class.java) ?: throw Exception("Session not found")
+
+            val subjectDoc = subjectsCollection.document(session.subjectId).get().await()
+            val subjectName = subjectDoc.getString("name") ?: "Unknown Subject"
+
             // Find existing attendance document
             val query = attendanceCollection
                 .whereEqualTo("sessionId", sessionId)
@@ -249,14 +256,19 @@ class FirebaseRepository {
                 )
                 attendanceCollection.document(docId).update(updates).await()
             } else {
-                // Create new attendance record
-                val attendance = Attendance(
-                    sessionId = sessionId,
-                    studentId = studentId,
-                    status = newStatus,
-                    markedBy = MarkedBy.TEACHER,
-                    overriddenBy = teacherId,
-                    markedAt = System.currentTimeMillis()
+                // Create new attendance record with subject info
+                val attendance = hashMapOf(
+                    "sessionId" to sessionId,
+                    "studentId" to studentId,
+                    "classroomId" to session.classroomId,
+                    "subjectId" to session.subjectId,
+                    "subjectName" to subjectName,
+                    "status" to newStatus.name,
+                    "markedBy" to MarkedBy.TEACHER.name,
+                    "overriddenBy" to teacherId,
+                    "markedAt" to System.currentTimeMillis(),
+                    "selfieUrl" to "",
+                    "verificationScore" to 0
                 )
                 attendanceCollection.add(attendance).await()
             }
@@ -320,17 +332,28 @@ class FirebaseRepository {
         verificationScore: Float
     ): Result<Unit> {
         return try {
-            val attendance = Attendance(
-                sessionId = sessionId,
-                studentId = studentId,
-                status = AttendanceStatus.PRESENT,
-                markedAt = System.currentTimeMillis(),
-                selfieBase64 = selfieBase64,
-                verificationScore = verificationScore,
-                markedBy = MarkedBy.STUDENT
+            // Get session details for subject info
+            val session = sessionsCollection.document(sessionId).get().await()
+                .toObject(Session::class.java) ?: throw Exception("Session not found")
+
+            val subjectDoc = subjectsCollection.document(session.subjectId).get().await()
+            val subjectName = subjectDoc.getString("name") ?: "Unknown Subject"
+
+            val attendanceData = hashMapOf(
+                "sessionId" to sessionId,
+                "studentId" to studentId,
+                "classroomId" to session.classroomId,
+                "subjectId" to session.subjectId,
+                "subjectName" to subjectName,
+                "status" to AttendanceStatus.PRESENT.name,
+                "markedAt" to System.currentTimeMillis(),
+                "markedBy" to MarkedBy.STUDENT.name,
+                "selfieUrl" to selfieBase64,
+                "verificationScore" to (verificationScore * 100).toInt(),
+                "overriddenBy" to ""
             )
 
-            attendanceCollection.add(attendance).await()
+            attendanceCollection.add(attendanceData).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -68,6 +68,11 @@
         <activity
             android:name=".ui.student.StudentAttendanceHistoryActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.student.StudentSubjectDetailActivity"
+            android:label="Subject Details"
+            android:parentActivityName=".ui.student.StudentAttendanceHistoryActivity"/>
     </application>
 
 </manifest>

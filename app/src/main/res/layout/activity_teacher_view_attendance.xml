@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Classroom Selection -->
     <Button
         android:id="@+id/btnSelectClassroom"
         android:layout_width="match_parent"
@@ -20,6 +22,22 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"/>
 
+    <!-- Subject Selection -->
+    <Button
+        android:id="@+id/btnSelectSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Subject"/>
+
+    <TextView
+        android:id="@+id/tvSelectedSubject"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="No subject selected"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Student Selection -->
     <Button
         android:id="@+id/btnSelectStudent"
         android:layout_width="match_parent"
@@ -34,6 +52,71 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"/>
 
+    <!-- Attendance Stats Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardStats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attendance Statistics"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvTotalSessions"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Total: 0"/>
+
+                <TextView
+                    android:id="@+id/tvAttended"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Present: 0"
+                    android:textColor="@android:color/holo_green_dark"/>
+
+                <TextView
+                    android:id="@+id/tvAbsent"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Absent: 0"
+                    android:textColor="@android:color/holo_red_dark"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvPercentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attendance: 0%"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Records List -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

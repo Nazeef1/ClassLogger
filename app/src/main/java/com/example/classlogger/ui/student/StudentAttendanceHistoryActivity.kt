@@ -68,7 +68,7 @@ class StudentAttendanceHistoryActivity : AppCompatActivity() {
                     } else {
                         binding.tvNoSubjects.visibility = View.GONE
                         binding.recyclerView.visibility = View.VISIBLE
-                        adapter.submitList(subjects)
+                        adapter.submitList(subjects, studentId)
                     }
                 }
                 .onFailure { error ->
@@ -87,9 +87,11 @@ class StudentAttendanceHistoryActivity : AppCompatActivity() {
 class SubjectAttendanceAdapter : RecyclerView.Adapter<SubjectAttendanceAdapter.ViewHolder>() {
 
     private var subjects = listOf<SubjectAttendance>()
+    private var studentId: String = ""
 
-    fun submitList(newSubjects: List<SubjectAttendance>) {
+    fun submitList(newSubjects: List<SubjectAttendance>, studentId: String = "") {
         subjects = newSubjects
+        this.studentId = studentId
         notifyDataSetChanged()
     }
 
@@ -135,6 +137,16 @@ class SubjectAttendanceAdapter : RecyclerView.Adapter<SubjectAttendanceAdapter.V
             }
             progressBar.setBackgroundColor(color)
             tvPercentage.setTextColor(color)
+
+            itemView.setOnClickListener {
+                val context = itemView.context
+                val intent = android.content.Intent(context, StudentSubjectDetailActivity::class.java).apply {
+                    putExtra("studentId", studentId)
+                    putExtra("subjectName", subject.subjectName)
+                    putExtra("subjectCode", subject.subjectCode)
+                }
+                context.startActivity(intent)
+            }
         }
     }
 }

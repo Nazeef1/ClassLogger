@@ -56,8 +56,8 @@ class SessionAttendanceListActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         adapter = SessionAttendanceAdapter(
             onViewSelfie = { attendance ->
-                if (attendance.selfieBase64.isNotEmpty()) {
-                    showSelfieDialog(attendance.selfieBase64)
+                if (attendance.selfieUrl.isNotEmpty()) {
+                    showSelfieDialog(attendance.selfieUrl)
                 }
             },
             onToggleAttendance = { student, attendance ->
@@ -200,7 +200,7 @@ class SessionAttendanceAdapter(
             }
 
             // Show view selfie button only if selfie exists
-            if (attendance.selfieBase64.isNotEmpty()) {
+            if (attendance.selfieUrl.isNotEmpty()) {
                 btnViewSelfie.visibility = View.VISIBLE
                 btnViewSelfie.setOnClickListener {
                     onViewSelfie(attendance)
