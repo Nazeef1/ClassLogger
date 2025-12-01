@@ -1,10 +1,6 @@
 package com.example.classlogger.network
 
-import com.example.classlogger.models.FaceVerificationResponse
-import com.example.classlogger.models.FaceEncodingRequest
-import com.example.classlogger.models.FaceEncodingResponse
-import com.example.classlogger.models.FaceVerificationRequest
-import com.example.classlogger.models.PredictResponse
+import com.example.classlogger.models.*
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -35,6 +31,18 @@ interface FaceNetApi {
     suspend fun predictFace(
         @Part file: MultipartBody.Part
     ): Response<PredictResponse>
+
+    // NEW: Check if name exists in NPZ file
+    @POST("/check-name")
+    suspend fun checkName(
+        @Body request: CheckNameRequest
+    ): Response<CheckNameResponse>
+
+    // NEW: Update label from name to Firebase ID
+    @POST("/update-label")
+    suspend fun updateLabel(
+        @Body request: UpdateLabelRequest
+    ): Response<UpdateLabelResponse>
 }
 
 // Retrofit Client Builder
@@ -45,7 +53,7 @@ object FaceNetApiClient {
 
     // Update this with your Cloudflare tunnel URL
     // Example: "https://your-tunnel-name.trycloudflare.com/"
-    private var BASE_URL = "https://packaging-exotic-microphone-changes.trycloudflare.com"
+    private var BASE_URL = "https://sensitive-convergence-bags-human.trycloudflare.com"
 
     fun setBaseUrl(url: String) {
         BASE_URL = if (url.endsWith("/")) url else "$url/"
