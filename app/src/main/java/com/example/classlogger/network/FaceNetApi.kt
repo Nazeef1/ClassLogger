@@ -53,7 +53,7 @@ object FaceNetApiClient {
 
     // Update this with your Cloudflare tunnel URL
     // Example: "https://your-tunnel-name.trycloudflare.com/"
-    private var BASE_URL = "https://sensitive-convergence-bags-human.trycloudflare.com"
+    private var BASE_URL = "https://variety-warrior-wow-identify.trycloudflare.com"
 
     fun setBaseUrl(url: String) {
         BASE_URL = if (url.endsWith("/")) url else "$url/"
